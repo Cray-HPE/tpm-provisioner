@@ -1,0 +1,17 @@
+---
+name: Test and Build (Go)
+
+on: [push, pull_request, workflow_dispatch]
+
+jobs:
+  go:
+    name: CSM PET Reusable Go Workflow
+    uses: Cray-HPE/k3s-test-action/.github/workflows/go.yml@main
+    with:
+      publish_container: true
+    secrets:
+      artifactory_password: ${{ secrets.ARTIFACTORY_ALGOL60_TOKEN }}
+      artifactory_username: ${{ secrets.ARTIFACTORY_ALGOL60_USERNAME }}
+      cosign_gcp_service_account: ${{ secrets.COSIGN_GCP_SERVICE_ACCOUNT }}
+      cosign_gcp_workload_identity_provider: ${{ secrets.COSIGN_GCP_WORKLOAD_IDENTITY_PROVIDER }}
+      snyk_token: ${{ secrets.SNYK_TOKEN }}
