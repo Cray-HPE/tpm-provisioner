@@ -22,10 +22,6 @@
 # OTHER DEALINGS IN THE SOFTWARE.
 #
 BUILD_METADATA ?= "1~development~$(shell git rev-parse --short HEAD)"
-CHART_METADATA_IMAGE ?= artifactory.algol60.net/csm-docker/stable/chart-metadata
-HELM_DOCS_IMAGE ?= artifactory.algol60.net/docker.io/jnorwood/helm-docs:v1.5.0
-HELM_IMAGE ?= artifactory.algol60.net/docker.io/alpine/helm:3.7.1
-HELM_UNITTEST_IMAGE ?= artifactory.algol60.net/docker.io/quintush/helm-unittest
 NAME ?= tpm-provisioner
 RPM_BUILD_DIR ?= $(PWD)/dist/rpmbuild
 RPM_NAME ?= tpm-provisioner-client
@@ -34,7 +30,7 @@ RPM_SOURCE_NAME ?= ${RPM_NAME}-${RPM_VERSION}
 RPM_SOURCE_PATH := ${RPM_BUILD_DIR}/SOURCES/${RPM_SOURCE_NAME}.tar.bz2
 SPEC_FILE ?= ${SPEC_NAME}.spec
 SPEC_NAME ?= tpm-provisioner
-YQ_IMAGE ?= artifactory.algol60.net/docker.io/mikefarah/yq:4
+
 export VERSION ?= $(shell cat .version)-local
 export WORKSPACE = $(shell pwd)
 export DOCKER_IMAGE ?= ${NAME}:${VERSION}
@@ -55,10 +51,7 @@ go_bin_dir = $(go_dir)/bin
 go_path := PATH="$(go_bin_dir):$(PATH)"
 go_url = https://storage.googleapis.com/golang/go$(go_version).linux-$(GOARCH).tar.gz
 
-
-
-all: test dockerimage chart
-chart: chart-lint dep-up chart-test chart-package
+docker: test dockerimage
 rpm: rpm_prepare rpm_package_source rpm_build_source rpm_build
 
 dockerimage:
@@ -91,62 +84,11 @@ build-linux:
 test:
 	go test -v ./...
 
-helm:
-	docker run --rm \
-		--user $(shell id -u):$(shell id -g) \
-		--mount type=bind,src="$(shell pwd)",dst=/src \
-		-w /src \
-		-e HELM_CACHE_HOME=/src/.helm/cache \
-		-e HELM_CONFIG_HOME=/src/.helm/config \
-		-e HELM_DATA_HOME=/src/.helm/data \
-		$(HELM_IMAGE) \
-		$(CMD)
-
-chart-lint:
-	CMD="lint charts/tpm-provisioner"              $(MAKE) helm
-
-dep-up:
-	CMD="dep up charts/tpm-provisioner"              $(MAKE) helm
-
-chart-test:
-	docker run --rm \
-		-v ${PWD}/charts:/apps \
-		${HELM_UNITTEST_IMAGE} -3 \
-		tpm-provisioner \
-
-chart-package:
-ifdef CHART_VERSIONS
-	CMD="package charts/tpm-provisioner              --version $(word 1, $(CHART_VERSIONS)) -d packages" $(MAKE) helm
-else
-	CMD="package charts/* -d packages" $(MAKE) helm
-endif
-
-extracted-images:
-	CMD="template release $(CHART) --dry-run --replace --dependency-update" $(MAKE) -s helm \
-	| docker run --rm -i $(YQ_IMAGE) e -N '.. | .image? | select(.)' -
-
-annotated-images:
-	CMD="show chart $(CHART)" $(MAKE) -s helm \
-	| docker run --rm -i $(YQ_IMAGE) e -N '.annotations."artifacthub.io/images"' - \
-	| docker run --rm -i $(YQ_IMAGE) e -N '.. | .image? | select(.)' -
-
-images:
-	{ CHART=charts/tpm-provisioner              $(MAKE) -s extracted-images annotated-images; \
-	} | sort -u
-
 snyk:
 	$(MAKE) -s images | xargs --verbose -n 1 snyk container test
 
-gen-docs:
-	docker run --rm \
-		--user $(shell id -u):$(shell id -g) \
-		--mount type=bind,src="$(shell pwd)",dst=/src \
-		-w /src \
-		$(HELM_DOCS_IMAGE) \
-		helm-docs --chart-search-root=charts
-
 clean:
-	$(RM) -r .helm packages charts/tpm-provisioner/charts
+	$(RM) -r bin/*
 
 rpm_prepare:
 	rm -rf $(RPM_BUILD_DIR)
