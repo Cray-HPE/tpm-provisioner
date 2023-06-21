@@ -8,7 +8,7 @@ jobs:
     name: CSM PET Reusable Go Workflow
     uses: Cray-HPE/k3s-test-action/.github/workflows/go.yml@main
     with:
-      publish_container: true
+      publish_container: false
     secrets:
       artifactory_password: ${{ secrets.ARTIFACTORY_ALGOL60_TOKEN }}
       artifactory_username: ${{ secrets.ARTIFACTORY_ALGOL60_USERNAME }}
