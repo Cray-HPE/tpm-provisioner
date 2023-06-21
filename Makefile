@@ -25,7 +25,6 @@ BUILD_METADATA ?= "1~development~$(shell git rev-parse --short HEAD)"
 CHART_METADATA_IMAGE ?= artifactory.algol60.net/csm-docker/stable/chart-metadata
 HELM_DOCS_IMAGE ?= artifactory.algol60.net/docker.io/jnorwood/helm-docs:v1.5.0
 HELM_IMAGE ?= artifactory.algol60.net/docker.io/alpine/helm:3.7.1
-HELM_UNITTEST_IMAGE ?= artifactory.algol60.net/docker.io/quintush/helm-unittest
 NAME ?= tpm-provisioner
 RPM_BUILD_DIR ?= $(PWD)/dist/rpmbuild
 RPM_NAME ?= tpm-provisioner-client
@@ -58,35 +57,20 @@ go_url = https://storage.googleapis.com/golang/go$(go_version).linux-$(GOARCH).t
 
 
 all: test dockerimage chart
-chart: chart-lint dep-up chart-test chart-package
+chart: chart-lint dep-up chart-package
 rpm: rpm_prepare rpm_package_source rpm_build_source rpm_build
 
 dockerimage:
 		docker build --no-cache --pull ${DOCKER_ARGS} --tag '${NAME}:${VERSION}' .
 
 build:
-	go build -o ./bin/tpm-provisioner-client ./cmd/client
-	go build -o ./bin/tpm-provisioner-server ./cmd/server
 	go build -o ./bin/tpm-getEK ./cmd/getEK
-	go build -o ./bin/tpm-blob-clear ./cmd/blob-clear
-	go build -o ./bin/tpm-blob-store ./cmd/blob-store
-	go build -o ./bin/tpm-blob-retrieve ./cmd/blob-retrieve
 
 build-jenkins:
-	$(go_bin_dir)/go build -o ./bin/tpm-provisioner-client ./cmd/client
-	$(go_bin_dir)/go build -o ./bin/tpm-provisioner-server ./cmd/server
 	$(go_bin_dir)/go build -o ./bin/tpm-getEK ./cmd/getEK
-	$(go_bin_dir)/go build -o ./bin/tpm-blob-clear ./cmd/blob-clear
-	$(go_bin_dir)/go build -o ./bin/tpm-blob-store ./cmd/blob-store
-	$(go_bin_dir)/go build -o ./bin/tpm-blob-retrieve ./cmd/blob-retrieve
 
 build-linux:
-	GOOS=linux go build -o ./bin/tpm-provisioner-client ./cmd/client
-	GOOS=linux go build -o ./bin/tpm-provisioner-server ./cmd/server
 	GOOS=linux go build -o ./bin/tpm-getEK ./cmd/getEK
-	GOOS=linux go build -o ./bin/tpm-blob-clear ./cmd/blob-clear
-	GOOS=linux go build -o ./bin/tpm-blob-store ./cmd/blob-store
-	GOOS=linux go build -o ./bin/tpm-blob-retrieve ./cmd/blob-retrieve
 
 test:
 	go test -v ./...
@@ -107,12 +91,6 @@ chart-lint:
 
 dep-up:
 	CMD="dep up charts/tpm-provisioner"              $(MAKE) helm
-
-chart-test:
-	docker run --rm \
-		-v ${PWD}/charts:/apps \
-		${HELM_UNITTEST_IMAGE} -3 \
-		tpm-provisioner \
 
 chart-package:
 ifdef CHART_VERSIONS
