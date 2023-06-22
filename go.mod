@@ -6,7 +6,11 @@ require (
 	github.com/golang/protobuf v1.5.3
 	github.com/google/go-tpm v0.9.0
 	github.com/google/go-tpm-tools v0.3.13-0.20230620182252-4639ecce2aba
+	github.com/google/uuid v1.3.0
+	github.com/gorilla/mux v1.8.0
 	github.com/sirupsen/logrus v1.9.3
+	github.com/spf13/viper v1.16.0
+	github.com/spiffe/go-spiffe/v2 v2.1.6
 	golang.org/x/crypto v0.9.0
 	google.golang.org/grpc v1.56.0
 	google.golang.org/protobuf v1.30.0
@@ -18,8 +22,6 @@ require (
 	github.com/go-jose/go-jose/v3 v3.0.0 // indirect
 	github.com/google/go-sev-guest v0.6.1 // indirect
 	github.com/google/logger v1.1.1 // indirect
-	github.com/google/uuid v1.3.0 // indirect
-	github.com/gorilla/mux v1.8.0 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/magiconair/properties v1.8.7 // indirect
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
@@ -30,8 +32,6 @@ require (
 	github.com/spf13/cast v1.5.1 // indirect
 	github.com/spf13/jwalterweatherman v1.1.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
-	github.com/spf13/viper v1.16.0 // indirect
-	github.com/spiffe/go-spiffe/v2 v2.1.6 // indirect
 	github.com/subosito/gotenv v1.4.2 // indirect
 	github.com/zeebo/errs v1.3.0 // indirect
 	golang.org/x/mod v0.8.0 // indirect
