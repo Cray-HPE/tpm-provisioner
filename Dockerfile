@@ -27,7 +27,7 @@ FROM artifactory.algol60.net/docker.io/library/golang:alpine AS build
 RUN apk add --no-cache git build-base openssl-dev
 
 RUN mkdir -p /build
-COPY cmd pkg third_party go.mod conf  tests  Dockerfile go.sum  Makefile /build/
+COPY . /build
 RUN cd /build && go build ./...
 RUN cd /build && go test -v ./...
 RUN	cd /build && go build -o /usr/local/bin/tpm-provisioner-server ./cmd/server
