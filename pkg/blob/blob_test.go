@@ -30,7 +30,7 @@ import (
 	"testing"
 
 	"github.com/cray-hpe/tpm-provisioner/pkg/blob"
-	"github.com/cray-hpe/tpm-provisioner/pkg/test"
+	"github.com/cray-hpe/tpm-provisioner/tests/simulateTPM"
 	"github.com/google/go-tpm-tools/simulator"
 )
 
@@ -43,7 +43,7 @@ func openTPM(tb testing.TB) io.ReadWriteCloser {
 		tb.Fatalf("Simulator initialization failed: %v", err)
 	}
 
-	_, err = test.CreateEK(simulator)
+	_, err = simulateTPM.CreateEK(simulator)
 	if err != nil {
 		tb.Fatalf("Unable to provision EK: %v", err)
 	}
