@@ -36,7 +36,7 @@ import (
 	"strings"
 
 	"github.com/cray-hpe/tpm-provisioner/pkg/blob"
-	"github.com/google/go-tpm/tpm2"
+	"github.com/google/go-tpm/legacy/tpm2"
 )
 
 // openTPM opens the tpm for use.
