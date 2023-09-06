@@ -64,13 +64,28 @@ dockerimage:
 		docker build --no-cache --pull ${DOCKER_ARGS} --tag '${NAME}:${VERSION}' .
 
 build:
+	go build -o ./bin/tpm-provisioner-client ./cmd/client
+	go build -o ./bin/tpm-provisioner-server ./cmd/server
 	go build -o ./bin/tpm-getEK ./cmd/getEK
+	go build -o ./bin/tpm-blob-clear ./cmd/blob-clear
+	go build -o ./bin/tpm-blob-store ./cmd/blob-store
+	go build -o ./bin/tpm-blob-retrieve ./cmd/blob-retrieve
 
 build-jenkins:
+	$(go_bin_dir)/go build -o ./bin/tpm-provisioner-client ./cmd/client
+	$(go_bin_dir)/go build -o ./bin/tpm-provisioner-server ./cmd/server
 	$(go_bin_dir)/go build -o ./bin/tpm-getEK ./cmd/getEK
+	$(go_bin_dir)/go build -o ./bin/tpm-blob-clear ./cmd/blob-clear
+	$(go_bin_dir)/go build -o ./bin/tpm-blob-store ./cmd/blob-store
+	$(go_bin_dir)/go build -o ./bin/tpm-blob-retrieve ./cmd/blob-retrieve
 
 build-linux:
+	GOOS=linux go build -o ./bin/tpm-provisioner-client ./cmd/client
+	GOOS=linux go build -o ./bin/tpm-provisioner-server ./cmd/server
 	GOOS=linux go build -o ./bin/tpm-getEK ./cmd/getEK
+	GOOS=linux go build -o ./bin/tpm-blob-clear ./cmd/blob-clear
+	GOOS=linux go build -o ./bin/tpm-blob-store ./cmd/blob-store
+	GOOS=linux go build -o ./bin/tpm-blob-retrieve ./cmd/blob-retrieve
 
 test:
 	go test -v ./...
