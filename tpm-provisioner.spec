@@ -50,15 +50,16 @@ TPM Provisioner client
 make build-jenkins
 
 %install
-mkdir -p %{buildroot}/usr/local/bin
 mkdir -p %{buildroot}/etc/tpm-provisioner
+mkdir -p %{buildroot}/opt/cray/cray-spire
+mkdir -p %{buildroot}/var/lib/tpm-provisoner
 install -D -m 0644 conf/blobs.conf %{buildroot}/etc/tpm-provisioner/blobs.conf
 install -D -m 0644 conf/client.conf %{buildroot}/etc/tpm-provisioner/client.conf
-install -D -m 0755 bin/tpm-provisioner-client %{buildroot}/usr/local/bin/tpm-provisioner-client
-install -D -m 0755 bin/tpm-getEK %{buildroot}/usr/local/bin/tpm-getEK
-install -D -m 0755 bin/tpm-blob-clear %{buildroot}/usr/local/bin/tpm-blob-clear
-install -D -m 0755 bin/tpm-blob-store %{buildroot}/usr/local/bin/tpm-blob-store
-install -D -m 0755 bin/tpm-blob-retrieve %{buildroot}/usr/local/bin/tpm-blob-retrieve
+install -D -m 0755 bin/tpm-provisioner-client %{buildroot}/opt/cray/cray-spire/tpm-provisioner-client
+install -D -m 0755 bin/tpm-getEK %{buildroot}/usr/bin/tpm-getEK
+install -D -m 0755 bin/tpm-blob-clear %{buildroot}/usr/bin/tpm-blob-clear
+install -D -m 0755 bin/tpm-blob-store %{buildroot}/usr/bin/tpm-blob-store
+install -D -m 0755 bin/tpm-blob-retrieve %{buildroot}/usr/bin/tpm-blob-retrieve
 
 %clean
 rm -rf %{buildroot}
@@ -67,8 +68,8 @@ rm -rf %{buildroot}
 %defattr(-,root,root)
 %config(noreplace) /etc/tpm-provisioner/blobs.conf
 %config(noreplace) /etc/tpm-provisioner/client.conf
-/usr/local/bin/tpm-provisioner-client
-/usr/local/bin/tpm-getEK
-/usr/local/bin/tpm-blob-clear
-/usr/local/bin/tpm-blob-store
-/usr/local/bin/tpm-blob-retrieve
+/opt/cray/cray-spire/tpm-provisioner-client
+/usr/bin/tpm-getEK
+/usr/bin/tpm-blob-clear
+/usr/bin/tpm-blob-store
+/usr/bin/tpm-blob-retrieve
