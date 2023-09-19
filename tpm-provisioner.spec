@@ -52,7 +52,7 @@ make build-jenkins
 %install
 mkdir -p %{buildroot}/etc/tpm-provisioner
 mkdir -p %{buildroot}/opt/cray/cray-spire
-mkdir -p %{buildroot}/var/lib/tpm-provisoner
+mkdir -p %{buildroot}/var/lib/tpm-provisioner
 install -D -m 0644 conf/blobs.conf %{buildroot}/etc/tpm-provisioner/blobs.conf
 install -D -m 0644 conf/client.conf %{buildroot}/etc/tpm-provisioner/client.conf
 install -D -m 0755 bin/tpm-provisioner-client %{buildroot}/opt/cray/cray-spire/tpm-provisioner-client
@@ -68,6 +68,7 @@ rm -rf %{buildroot}
 %defattr(-,root,root)
 %config(noreplace) /etc/tpm-provisioner/blobs.conf
 %config(noreplace) /etc/tpm-provisioner/client.conf
+%dir /var/lib/tpm-provisioner
 /opt/cray/cray-spire/tpm-provisioner-client
 /usr/bin/tpm-getEK
 /usr/bin/tpm-blob-clear
