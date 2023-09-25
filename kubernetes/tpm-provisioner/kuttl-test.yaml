@@ -1,7 +1,7 @@
 #
 # MIT License
 #
-# (C) Copyright 2023 Hewlett Packard Enterprise Development LP
+# (C) Copyright 2021-2023 Hewlett Packard Enterprise Development LP
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the "Software"),
@@ -20,25 +20,20 @@
 # OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
 # ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 # OTHER DEALINGS IN THE SOFTWARE.
-#
-########### Build ##########
-FROM artifactory.algol60.net/docker.io/library/golang:alpine AS build
 
-RUN apk add --no-cache git build-base openssl-dev
-
-RUN mkdir -p /build
-COPY . /build
-RUN cd /build && go build ./...
-RUN cd /build && go test -v ./...
-RUN	cd /build && go build -o /usr/local/bin/tpm-provisioner-server ./cmd/server
-
-########## Runtime ##########
-FROM artifactory.algol60.net/docker.io/library/alpine AS runtime
-RUN addgroup -S nonroot
-RUN adduser -S nonroot -G nonroot
-USER nonroot
-
-COPY --from=build /usr/local/bin/tpm-provisioner-server /usr/local/bin/tpm-provisioner-server
-COPY ./.version /version
-EXPOSE 8080/tcp
-ENTRYPOINT ["/usr/local/bin/tpm-provisioner-server"]
+---
+apiVersion: kuttl.dev/v1beta1
+kind: TestSuite
+commands:
+  - command: ./tests/kuttl/load-kind.sh
+  - command: kubectl create ns spire
+  - command: kubectl apply -f ./tests/kuttl/virtualservices.yaml
+  - command: kubectl apply -f ./tests/kuttl/csm-high-priority-service.yaml
+  - command: kubectl apply -f ./tests/kuttl/tpm-provisioner-tls.yaml
+  - command: helm install --wait --namespace spire tpm-provisioner .
+testDirs:
+  - ./tests/kuttl
+startKIND: true
+kindConfig: kind.yaml
+kindNodeCache: true
+artifactsDir: /tmp/kuttl

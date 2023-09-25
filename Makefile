@@ -34,7 +34,7 @@ RPM_SOURCE_PATH := ${RPM_BUILD_DIR}/SOURCES/${RPM_SOURCE_NAME}.tar.bz2
 SPEC_FILE ?= ${SPEC_NAME}.spec
 SPEC_NAME ?= tpm-provisioner
 YQ_IMAGE ?= artifactory.algol60.net/docker.io/mikefarah/yq:4
-export VERSION ?= $(shell cat .version)-local
+export VERSION ?= $(shell cat .version)
 export WORKSPACE = $(shell pwd)
 export DOCKER_IMAGE ?= ${NAME}:${VERSION}
 
@@ -102,16 +102,16 @@ helm:
 		$(CMD)
 
 chart-lint:
-	CMD="lint charts/tpm-provisioner"              $(MAKE) helm
+	CMD="lint kubernetes/tpm-provisioner"              $(MAKE) helm
 
 dep-up:
-	CMD="dep up charts/tpm-provisioner"              $(MAKE) helm
+	CMD="dep up kubernetes/tpm-provisioner"              $(MAKE) helm
 
 chart-package:
 ifdef CHART_VERSIONS
-	CMD="package charts/tpm-provisioner              --version $(word 1, $(CHART_VERSIONS)) -d packages" $(MAKE) helm
+	CMD="package kubernetes/tpm-provisioner              --version $(word 1, $(CHART_VERSIONS)) -d packages" $(MAKE) helm
 else
-	CMD="package charts/* -d packages" $(MAKE) helm
+	CMD="package kubernetes/* -d packages" $(MAKE) helm
 endif
 
 extracted-images:
@@ -124,7 +124,7 @@ annotated-images:
 	| docker run --rm -i $(YQ_IMAGE) e -N '.. | .image? | select(.)' -
 
 images:
-	{ CHART=charts/tpm-provisioner              $(MAKE) -s extracted-images annotated-images; \
+	{ CHART=kubernetes/tpm-provisioner              $(MAKE) -s extracted-images annotated-images; \
 	} | sort -u
 
 snyk:
@@ -139,7 +139,7 @@ gen-docs:
 		helm-docs --chart-search-root=charts
 
 clean:
-	$(RM) -r .helm packages charts/tpm-provisioner/charts
+	$(RM) -r .helm packages kubernetes/tpm-provisioner/charts
 
 rpm_prepare:
 	rm -rf $(RPM_BUILD_DIR)

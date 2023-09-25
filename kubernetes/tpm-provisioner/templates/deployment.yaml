@@ -1,0 +1,109 @@
+{{- /*
+MIT License
+
+(C) Copyright 2023 Hewlett Packard Enterprise Development LP
+
+Permission is hereby granted, free of charge, to any person obtaining a
+copy of this software and associated documentation files (the "Software"),
+to deal in the Software without restriction, including without limitation
+the rights to use, copy, modify, merge, publish, distribute, sublicense,
+and/or sell copies of the Software, and to permit persons to whom the
+Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included
+in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR
+OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+OTHER DEALINGS IN THE SOFTWARE.
+*/}}
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "tpm-provisioner.fullname" . }}
+  labels:
+    app.kubernetes.io/name: {{ template "tpm-provisioner.name" . }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  serviceName: {{ include "tpm-provisioner.name" . }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "tpm-provisioner.name" . }}
+  template:
+    metadata:
+      annotations:
+      {{- with .Values.annotations }}
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        app.kubernetes.io/name: {{ include "tpm-provisioner.name" . }}
+    spec:
+      serviceAccountName: {{ include "tpm-provisioner.name" . }}
+{{- if .Values.priorityClassName }}
+      priorityClassName: {{ .Values.priorityClassName }}
+{{- end }}
+      affinity:
+          podAntiAffinity:
+             preferredDuringSchedulingIgnoredDuringExecution:
+               - weight: 1
+                 podAffinityTerm:
+                   labelSelector:
+                     matchExpressions:
+                     - key: app
+                       operator: In
+                       values:
+                       - {{ include "tpm-provisioner.name" . }}
+                   topologyKey: kubernetes.io/hostname
+      containers:
+        - name: {{ include "tpm-provisioner.name" . }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          securityContext:
+            runAsUser: 65534
+            runAsGroup: 65534
+            runAsNonRoot: true
+          ports:
+            - name: {{ .Values.port.name }}
+              containerPort: {{ .Values.port.value }}
+              protocol: TCP
+          livenessProbe:
+            tcpSocket:
+              port: {{ .Values.port.name }}
+          readinessProbe:
+            tcpSocket:
+              port: {{ .Values.port.name }}
+          volumeMounts:
+            - name: config
+              mountPath: /etc/tpm-provisioner
+            - name: tls
+              mountPath: /tls
+            - name: manufacturercas
+              mountPath: /manufacturers
+            - name: whitelist
+              mountPath: /whitelist
+            - name: tls-ca
+              mountPath: /etc/ssl/certs
+      volumes:
+        - name: config
+          configMap:
+            name: {{ include "tpm-provisioner.name" . }}-config
+        - name: tls
+          secret:
+            secretName: tpm.spire.ca-tls
+            optional: false
+        - name: manufacturercas
+          configMap:
+            name: {{ include "tpm-provisioner.name" . }}-manufacturercas
+        - name: whitelist
+          persistentVolumeClaim:
+            claimName: {{ include "tpm-provisioner.name" . }}-whitelist
+        - name: tls-ca
+          secret:
+            secretName: tpm.spire.ca-tls
+            items:
+              - key: ca.crt
+                path: platform-ca.crt

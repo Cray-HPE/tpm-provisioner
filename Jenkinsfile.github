@@ -50,7 +50,7 @@ pipeline {
 
     stages {
 
-        stage('Build & Publish') {
+        stage('Build & Publish RPM') {
 
             matrix {
 
@@ -142,5 +142,50 @@ pipeline {
                 }
             }
         }
+
+        stage('Build & Publish Docker Image'){
+
+            stages {
+
+                stage('Build Docker Image') {
+                    steps {
+                        sh "make dockerimage"
+                    }
+                }
+
+                stage("Publish Docker Image") {
+                    steps {
+                        script {
+                            publishCsmDockerImage(image: env.NAME, tag: env.VERSION, isStable: isStable)
+                        }
+                    }
+                }
+
+            }
+
+        }
+
+        stage('Build & Publish Helm Chart'){
+
+            stages {
+
+                stage('Build Helm Chart') {
+                    steps {
+                        sh "make chart"
+                    }
+                }
+
+                stage("Publish Chart") {
+                    steps {
+                        script {
+                            publishCsmHelmCharts(component: env.NAME, chartsPath: "${WORKSPACE}/packages", isStable: isStable)
+                        }
+                    }
+                }
+
+            }
+
+        }
+
     }
 }

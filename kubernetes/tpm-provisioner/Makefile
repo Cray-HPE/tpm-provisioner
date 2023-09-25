@@ -1,7 +1,7 @@
 #
 # MIT License
 #
-# (C) Copyright 2023 Hewlett Packard Enterprise Development LP
+# (C) Copyright [2023] Hewlett Packard Enterprise Development LP
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the "Software"),
@@ -21,24 +21,27 @@
 # ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 # OTHER DEALINGS IN THE SOFTWARE.
 #
-########### Build ##########
-FROM artifactory.algol60.net/docker.io/library/golang:alpine AS build
+current_dir := $(shell pwd)
+tmp_dir := $(shell mktemp -d)
 
-RUN apk add --no-cache git build-base openssl-dev
+.SILENT: helmlint eval kuttl kuttl-clean kuttl-keep unittest
+.PHONY: helmlint eval kuttl kuttl-clean kuttl-keep unittest
 
-RUN mkdir -p /build
-COPY . /build
-RUN cd /build && go build ./...
-RUN cd /build && go test -v ./...
-RUN	cd /build && go build -o /usr/local/bin/tpm-provisioner-server ./cmd/server
+all: helmlint eval unittest kuttl
 
-########## Runtime ##########
-FROM artifactory.algol60.net/docker.io/library/alpine AS runtime
-RUN addgroup -S nonroot
-RUN adduser -S nonroot -G nonroot
-USER nonroot
+lint: helmlint eval unittest
 
-COPY --from=build /usr/local/bin/tpm-provisioner-server /usr/local/bin/tpm-provisioner-server
-COPY ./.version /version
-EXPOSE 8080/tcp
-ENTRYPOINT ["/usr/local/bin/tpm-provisioner-server"]
+eval:
+	helm kubeval -n spire spire . --ignore-missing-schemas
+
+helmlint:
+	helm lint
+
+kuttl:
+	kubectl kuttl test
+
+kuttl-keep:
+	kubectl kuttl test --skip-cluster-delete --skip-delete
+
+kuttl-clean:
+	kind delete cluster
