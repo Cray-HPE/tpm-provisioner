@@ -21,24 +21,27 @@
 # ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 # OTHER DEALINGS IN THE SOFTWARE.
 #
-########### Build ##########
-FROM artifactory.algol60.net/docker.io/library/golang:alpine AS build
-
-RUN apk add --no-cache git build-base openssl-dev
-
-RUN mkdir -p /build
-COPY . /build
-RUN cd /build && go build ./...
-RUN cd /build && go test -v ./...
-RUN	cd /build && go build -o /usr/local/bin/tpm-provisioner-server ./cmd/server
-
-########## Runtime ##########
-FROM artifactory.algol60.net/docker.io/library/alpine AS runtime
-RUN addgroup -S nonroot
-RUN adduser -S nonroot -G nonroot
-USER nonroot
-
-COPY --from=build /usr/local/bin/tpm-provisioner-server /usr/local/bin/tpm-provisioner-server
-COPY ./.version /version
-EXPOSE 8080/tcp
-ENTRYPOINT ["/usr/local/bin/tpm-provisioner-server"]
+name: Lint, test, and scan Helm charts
+on:
+  pull_request:
+    branches:
+      - master
+      - release/**
+  workflow_dispatch:
+jobs:
+  lint-test-scan:
+    uses: Cray-HPE/.github/.github/workflows/charts-lint-test-scan.yml@main
+    with:
+      scan-image-snyk-args: "--severity-threshold=high"
+      lint-charts: ${{ github.event_name == 'pull_request' }}
+      ct-config: |
+        chart-dirs:
+          - kubernetes
+        validate-maintainers: false
+      scan-chart-snyk-args: "--severity-threshold=high --policy-path=kubernetes/.snyk"
+      scan-images: false
+    secrets:
+      snyk-token: ${{ secrets.SNYK_TOKEN }}
+      github-token: ${{ secrets.GITHUB_TOKEN }}
+      artifactory-username: ${{ secrets.ARTIFACTORY_ALGOL60_READONLY_USERNAME }}
+      artifactory-password: ${{ secrets.ARTIFACTORY_ALGOL60_READONLY_TOKEN }}

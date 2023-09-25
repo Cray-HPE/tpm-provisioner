@@ -31,6 +31,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"io"
 	"log"
 	"net/http"
 	"strings"
@@ -63,6 +64,14 @@ func authorize(id pkix.Name, url string, jwt string) (string, error) {
 	resp, err := httpClient.Do(req)
 	if err != nil {
 		return "", err
+	}
+
+	if resp.StatusCode != 200 {
+		data, err := io.ReadAll(resp.Body)
+		if err != nil {
+			return "", err
+		}
+		return "", fmt.Errorf("error authorizing to tpm-provisioner: %+v: %v", resp.StatusCode, string(data))
 	}
 
 	var j provisioner.AuthorizeResponse
