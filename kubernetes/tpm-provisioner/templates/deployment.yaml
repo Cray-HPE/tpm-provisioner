@@ -42,7 +42,7 @@ spec:
       labels:
         app.kubernetes.io/name: {{ include "tpm-provisioner.name" . }}
     spec:
-      serviceAccountName: {{ include "tpm-provisioner.name" . }}
+      serviceAccountName: {{ include "tpm-provisioner.fullname" . }}
 {{- if .Values.priorityClassName }}
       priorityClassName: {{ .Values.priorityClassName }}
 {{- end }}
@@ -90,17 +90,17 @@ spec:
       volumes:
         - name: config
           configMap:
-            name: {{ include "tpm-provisioner.name" . }}-config
+            name: {{ include "tpm-provisioner.fullname" . }}-config
         - name: tls
           secret:
             secretName: tpm.spire.ca-tls
             optional: false
         - name: manufacturercas
           configMap:
-            name: {{ include "tpm-provisioner.name" . }}-manufacturercas
+            name: {{ include "tpm-provisioner.fullname" . }}-manufacturercas
         - name: whitelist
           persistentVolumeClaim:
-            claimName: {{ include "tpm-provisioner.name" . }}-whitelist
+            claimName: {{ include "tpm-provisioner.fullname" . }}-whitelist
         - name: tls-ca
           secret:
             secretName: tpm.spire.ca-tls
