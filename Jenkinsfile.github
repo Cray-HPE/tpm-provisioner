@@ -136,6 +136,20 @@ pipeline {
                                         os: "sle-${sles_major}sp${sles_minor}",
                                         pattern: "dist/rpmbuild/SRPMS/*.rpm",
                                 )
+                                publishCsmRpms(
+                                        arch: "${ARCH}",
+                                        component: env.NAME,
+                                        isStable: isStable,
+                                        os: "noos",
+                                        pattern: "dist/rpmbuild/RPMS/${arch}/*.rpm",
+                                )
+                                publishCsmRpms(
+                                        arch: "src",
+                                        component: env.NAME,
+                                        isStable: isStable,
+                                        os: "noos",
+                                        pattern: "dist/rpmbuild/SRPMS/*.rpm",
+                                )
                             }
                         }
                     }
