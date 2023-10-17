@@ -48,6 +48,11 @@ endif
 
 DIR := ${CURDIR}
 build_dir := $(DIR)/.build/$(GOARCH)
+#ifeq "$(GOARCH)" "arm64"
+#    go_version := 1.19
+#else ifeq "$(GOARCH)" "amd64"
+#    go_version = $(shell grep '^go' go.mod | awk '{print $$2}')
+#endif
 go_version = $(shell grep '^go' go.mod | awk '{print $$2}')
 go_dir := $(build_dir)/go/$(go_version)
 go_bin_dir = $(go_dir)/bin
