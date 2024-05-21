@@ -44,8 +44,10 @@ pipeline {
 
     environment {
         NAME = getRepoName()
+        DESCRIPTION = "TPM Provisioner provides tooling to connect TPM to Spire"
         VERSION = sh(returnStdout: true, script: "cat .version").trim()
         BUILD = sh(returnStdout: true, script: "git describe --tags | tr -s '-' '~' | sed 's/^v//'").trim()
+        DOCKER_ARGS = getDockerBuildArgs(name: env.NAME, description: env.DESCRIPTION)
     }
 
     stages {
