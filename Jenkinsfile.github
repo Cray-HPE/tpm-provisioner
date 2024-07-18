@@ -27,7 +27,7 @@
 
 def isStable = env.TAG_NAME != null ? true : false
 def sleImage = 'artifactory.algol60.net/csm-docker/stable/csm-docker-sle'
-def sleVersion = 'latest'
+def sleVersion = '15.5'
 
 pipeline {
 
