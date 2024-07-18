@@ -25,7 +25,7 @@ Name: tpm-provisioner-client
 License: MIT
 Summary: TPM Provisioner Client
 Version: %(echo $VERSION | sed 's/^v//')
-Release: 2
+Release: 3
 Source: %{name}-%{version}.tar.bz2
 Group: Applications/System
 Vendor: Hewlett Packard Enterprise Company
